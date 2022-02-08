@@ -7,15 +7,27 @@ public class InputManager : MonoBehaviour
 {
     private bool isMove = false;
 
+    public Movement_Joystick virtualStick;
+
     void Start()
     {
-        GameManager.InGame += ANG;
+        GameManager.InGame += MobileInput;
     }
 
-    void ANG()
+    void MobileInput()
     {
-        int keyCode = 0;
-        isMove = false;
+        if (!virtualStick) return;
+
+        KeyMessage msg = new KeyMessage(virtualStick.joystickVec.x);
+
+        if (BackendMatchManager.GetInstance().IsHost())
+        {
+            BackendMatchManager.GetInstance().SendDataToInGame<KeyMessage>(msg);
+        }
+        else
+        {
+            BackendMatchManager.GetInstance().SendDataToInGame<KeyMessage>(msg);
+        }
 
 
     }

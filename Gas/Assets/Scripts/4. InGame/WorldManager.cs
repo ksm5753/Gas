@@ -246,6 +246,19 @@ public class WorldManager : MonoBehaviour
                 GameManager.GetInstance().ChangeState(GameManager.GameState.InGame);
                 break;
 
+            case Type.Key:
+                print("ANG");
+                KeyMessage keyMessage = DataParser.ReadJsonData<KeyMessage>(args.BinaryUserData);
+                ProcessKeyEvent(args.From.SessionId, keyMessage);
+                break;
         }
+    }
+
+    private void ProcessKeyEvent(SessionId index, KeyMessage keyMessage)
+    {
+        //호스트만 실행
+        if (!BackendMatchManager.GetInstance().IsHost()) return;
+
+        players[index].SetRotate(keyMessage.x);
     }
 }

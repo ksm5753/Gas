@@ -61,7 +61,7 @@ public class GameManager : MonoBehaviour
                 StopCoroutine(InGameUpdateCoroutine);
                 yield return null;
             }
-
+            InGame();
             yield return new WaitForSeconds(.1f);
         }
     }

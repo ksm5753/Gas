@@ -10,6 +10,9 @@ namespace Protocol
     {
         AIPlayerInfo,
 
+
+        Key,
+
         StartCount,
         LoadRoomScene,
         LoadGameScene,
@@ -25,6 +28,16 @@ namespace Protocol
         public Message(Type type)
         {
             this.type = type;
+        }
+    }
+
+    public class KeyMessage : Message
+    {
+        public float x;
+
+        public KeyMessage(float x) : base(Type.Key)
+        {
+            this.x = x;
         }
     }
 
