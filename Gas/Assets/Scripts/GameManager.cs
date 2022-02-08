@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
 
-        InGameUpdateCoroutine = InGameUpdate();
+        //InGameUpdateCoroutine = InGameUpdate();
     }
 
     void Start()
@@ -52,7 +52,15 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Login;
     }
 
-     IEnumerator InGameUpdate()
+    private void Update()
+    {
+        if(gameState == GameState.InGame)
+        {
+            InGame();
+        }
+    }
+
+    IEnumerator InGameUpdate()
     {
         while (true)
         {

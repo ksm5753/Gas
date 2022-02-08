@@ -20,6 +20,7 @@ public class InputManager : MonoBehaviour
 
         KeyMessage msg = new KeyMessage(virtualStick.joystickVec.x);
 
+
         if (BackendMatchManager.GetInstance().IsHost())
         {
             BackendMatchManager.GetInstance().SendDataToInGame<KeyMessage>(msg);

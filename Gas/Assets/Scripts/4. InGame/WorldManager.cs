@@ -247,7 +247,6 @@ public class WorldManager : MonoBehaviour
                 break;
 
             case Type.Key:
-                print("ANG");
                 KeyMessage keyMessage = DataParser.ReadJsonData<KeyMessage>(args.BinaryUserData);
                 ProcessKeyEvent(args.From.SessionId, keyMessage);
                 break;
