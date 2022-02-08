@@ -39,8 +39,8 @@ public class Player : MonoBehaviour
 
         if (this.isMe)
         {
-            CM.Follow = GameObject.Find("FollowCam").transform;
-            CM.LookAt = GameObject.Find("FollowCam").transform;
+            CM.Follow = this.transform.GetChild(0).transform;
+            CM.LookAt = this.transform.GetChild(0).transform;
         }
 
         this.isLive = true;
