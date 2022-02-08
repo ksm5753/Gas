@@ -41,7 +41,6 @@ public partial class BackendMatchManager : MonoBehaviour
     private void ProcessMatchInGameAccess(MatchInGameSessionEventArgs args)
     {
         //if (isReconnectProcess) { }
-        print("ANG");
         print("BackendInGame.cs - ProcessMatchInGameAccess - " + string.Format(SUCCESS_ACCESS_INGAME, args.ErrInfo));
 
         if(args.ErrInfo != ErrorCode.Success)

@@ -1,10 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
     private static InGameUI instance;
+
+    public Text scoreBoard;
+    public GameObject startCountObject;
+    private Text startCountText;
 
     public static InGameUI GetInstance()
     {
@@ -21,5 +26,25 @@ public class InGameUI : MonoBehaviour
     {
         if (instance != null) Destroy(instance);
         instance = this;
+
+        startCountText = startCountObject.GetComponentInChildren<Text>();
+        startCountObject.SetActive(true);
+    }
+
+    public void SetScoreBoard(int score)
+    {
+        scoreBoard.text = "Remain Player : " + score;
+    }
+
+    public void SetStartCount(int time, bool isEnable = true)
+    {
+        startCountObject.SetActive(isEnable);
+        if (isEnable)
+        {
+            if (time == 0)
+                startCountText.text = "Game Start!";
+            else
+                startCountText.text = string.Format("{0}", time);
+        }
     }
 }

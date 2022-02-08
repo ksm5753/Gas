@@ -7,7 +7,7 @@ using BackEnd.Tcp;
 
 public class WorldManager : MonoBehaviour
 {
-    private static WorldManager instance;
+    public static WorldManager instance;
     private const int START_COUNT = 3;
 
     private SessionId myPlayerIndex = SessionId.None;
@@ -23,6 +23,8 @@ public class WorldManager : MonoBehaviour
     private List<Vector3> startingPoints;
 
     private Stack<SessionId> gameRecord;
+    public delegate void PlayerDie(SessionId index);
+    public PlayerDie dieEvent;
 
     #endregion
 
@@ -57,11 +59,11 @@ public class WorldManager : MonoBehaviour
         }
         print("WorldManager.cs - InitializeGame - 게임 초기화 진행");
         gameRecord = new Stack<SessionId>();
-
+        //GameManager.
 
 
         myPlayerIndex = SessionId.None;
-        SetPlayerAttribute();
+        SetPlayerAttribute(); //플레이어 위치
         GameStart();
         return true;
     }
@@ -78,6 +80,40 @@ public class WorldManager : MonoBehaviour
             Vector3 point = child.transform.position;
             startingPoints.Add(point);
         }
+
+        dieEvent += PlayerDieEvent;
+    }
+
+    private void PlayerDieEvent(SessionId index)
+    {
+        alivePlayer -= 1;
+        players[index].gameObject.SetActive(false);
+
+        InGameUI.GetInstance().SetScoreBoard(alivePlayer);
+        gameRecord.Push(index);
+
+        print("WorldManager.cs - PlayerDieEvent - " + string.Format("Player Die : " + players[index].GetNickName()));
+
+        //호스트가 아니면 바로 리턴
+        if (!BackendMatchManager.GetInstance().IsHost()) return;
+
+        //1명 이하로 플레이어가 남으면 바로 종료 체크
+        if (alivePlayer <= 1)
+            SendGameEndOrder();
+    }
+
+    private void SendGameEndOrder()
+    {
+        //게임 종료 전환 메시지는 호스트에서만 보냄
+        print("WorldManager.cs - SendGameEndOrder - Make GameResult & Send Game End Order");
+        foreach(SessionId session in BackendMatchManager.GetInstance().sessionIdList)
+        {
+            if (players[session].GetIsLive() && !gameRecord.Contains(session))
+                gameRecord.Push(session);
+        }
+
+        GameEndMessage message = new GameEndMessage(gameRecord);
+        BackendMatchManager.GetInstance().SendDataToInGame<GameEndMessage>(message);
     }
 
     public void GameStart()
@@ -152,5 +188,64 @@ public class WorldManager : MonoBehaviour
             index += 1;
         }
         print("WorldManager.cs - SetPlayerInfo - Num Of Current Player : " + size);
+
+        //스코어 보드 설정
+        alivePlayer = size;
+        InGameUI.GetInstance().SetScoreBoard(alivePlayer);
+
+        if (BackendMatchManager.GetInstance().IsHost())
+            StartCoroutine("StartCount");
+    }
+
+    IEnumerator StartCount()
+    {
+        StartCountMessage msg = new StartCountMessage(START_COUNT);
+
+        //카운트 다운
+        for(int i = 0; i < START_COUNT + 1; i++)
+        {
+            msg.time = START_COUNT - i;
+            BackendMatchManager.GetInstance().SendDataToInGame<StartCountMessage>(msg);
+            yield return new WaitForSeconds(1);
+        }
+
+        //게임 시작 메시지 전송
+        GameStartMessage gameStartMessage = new GameStartMessage();
+        BackendMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameStartMessage);
+    }
+
+    public void OnRecieve(MatchRelayEventArgs args)
+    {
+        if(args.BinaryUserData == null)
+        {
+            print("WorldManager.cs - OnRecieve - " + string.Format("빈 데이터가 브로드캐스팅 되었습니다.\n{0} - {1}", args.From, args.ErrInfo));
+            //데이터가 없으면 그냥 리턴
+            return;
+        }
+
+        Message msg = DataParser.ReadJsonData<Message>(args.BinaryUserData);
+        if (msg == null) return;
+
+        if (BackendMatchManager.GetInstance().IsHost() != true && args.From.SessionId == myPlayerIndex) return;
+
+        if(players == null)
+        {
+            print("WorldManager.cs - OnRecieve - Players 정보가 존재하지 않습니다.");
+            return;
+        }
+
+        switch (msg.type)
+        {
+            case Type.StartCount:
+                StartCountMessage startCount = DataParser.ReadJsonData<StartCountMessage>(args.BinaryUserData);
+                print("WorldManager.cs - OnRecieve - Wait Second : " + startCount.time);
+                InGameUI.GetInstance().SetStartCount(startCount.time);
+                break;
+            case Type.GameStart:
+                InGameUI.GetInstance().SetStartCount(0, false);
+                GameManager.GetInstance().ChangeState(GameManager.GameState.InGame);
+                break;
+
+        }
     }
 }

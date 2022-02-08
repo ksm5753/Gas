@@ -15,7 +15,15 @@ public class GameManager : MonoBehaviour
     private const string INGAME = "4. InGame";
     #endregion
 
+    #region Actions-Events
+    public static event Action InGame = delegate { };
+
+    #endregion
+
     private string asyncSceneName = string.Empty;
+
+    private IEnumerator InGameUpdateCoroutine;
+
     public enum GameState { Login, Lobby, Ready, Start, InGame };
     private GameState gameState;
 
@@ -35,11 +43,27 @@ public class GameManager : MonoBehaviour
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         DontDestroyOnLoad(this.gameObject);
+
+        InGameUpdateCoroutine = InGameUpdate();
     }
 
     void Start()
     {
         gameState = GameState.Login;
+    }
+
+     IEnumerator InGameUpdate()
+    {
+        while (true)
+        {
+            if(gameState != GameState.InGame)
+            {
+                StopCoroutine(InGameUpdateCoroutine);
+                yield return null;
+            }
+
+            yield return new WaitForSeconds(.1f);
+        }
     }
 
     public void ChangeState(GameState state, Action<bool> func = null)
@@ -57,6 +81,9 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.Start:
                 GameStart();
+                break;
+            case GameState.InGame:
+                StartCoroutine(InGameUpdateCoroutine);
                 break;
         }
     }

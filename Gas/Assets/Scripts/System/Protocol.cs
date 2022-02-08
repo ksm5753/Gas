@@ -10,9 +10,11 @@ namespace Protocol
     {
         AIPlayerInfo,
 
+        StartCount,
         LoadRoomScene,
         LoadGameScene,
         GameSync,
+        GameStart,
         GameEnd
     }
 
@@ -75,6 +77,15 @@ namespace Protocol
         }
     }
 
+    public class StartCountMessage : Message
+    {
+        public int time;
+        public StartCountMessage(int time) : base(Type.StartCount)
+        {
+            this.time = time;
+        }
+    }
+
     public class GameSyncMessage : Message
     {
         public SessionId host;
@@ -102,7 +113,7 @@ namespace Protocol
 
     public class GameStartMessage : Message
     {
-        public GameStartMessage() : base(Type.GameEnd)
+        public GameStartMessage() : base(Type.GameStart)
         {
 
         }

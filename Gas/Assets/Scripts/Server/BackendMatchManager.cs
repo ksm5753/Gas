@@ -268,6 +268,10 @@ public partial class BackendMatchManager : MonoBehaviour
                 //게임 사전 설정을 진행하였으면 바로 리턴
                 return;
             }
+
+            if (WorldManager.instance == null) return;
+
+            WorldManager.instance.OnRecieve(args);
         };
 
         Backend.Match.OnLeaveInGameServer += (args) =>

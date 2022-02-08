@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Protocol;
 using BackEnd;
+using Cinemachine;
 using BackEnd.Tcp;
 
 public class Player : MonoBehaviour
@@ -14,8 +15,7 @@ public class Player : MonoBehaviour
     private bool isMe = false;
 
     //UI
-    public GameObject nameObject;
-    private readonly string playerCanvas = "PlayerCanvas";
+    public TextMesh nicknameText;
 
     //이동 관련
     public bool isMove { get; private set; }
@@ -32,13 +32,16 @@ public class Player : MonoBehaviour
         this.index = index;
         this.nickName = nickName;
 
-        var playerUICanvas = GameObject.FindGameObjectWithTag(playerCanvas);
-        nameObject = Instantiate(nameObject, Vector3.zero, Quaternion.identity, playerUICanvas.transform);
+        nicknameText.text = nickName;
 
-        nameObject.GetComponent<Text>().text = nickName;
+        var CM = GameObject.Find("Player_Camera").GetComponent<CinemachineVirtualCamera>();
+        
 
-        //if (this.isMe)
-        //    Camera.main.GetComponent<FollowCam>().target = this.transform;
+        if (this.isMe)
+        {
+            CM.Follow = GameObject.Find("FollowCam").transform;
+            CM.LookAt = GameObject.Find("FollowCam").transform;
+        }
 
         this.isLive = true;
         this.isMove = false;
@@ -46,8 +49,6 @@ public class Player : MonoBehaviour
         this.isRotate = false;
 
         playerObject = this.gameObject;
-
-        nameObject.transform.position = GetNameUIPos();
     }
 
     #region 이동관련 함수
@@ -138,12 +139,6 @@ public class Player : MonoBehaviour
     private void PlayerDie()
     {
         isLive = false;
-        nameObject.SetActive(false);
-    }
-
-    Vector3 GetNameUIPos()
-    {
-        return this.transform.position + (Vector3.forward * 1.5f) + (Vector3.up * 2.5f);
     }
 
     public SessionId GetIndex()
@@ -172,8 +167,5 @@ public class Player : MonoBehaviour
             PlayerDie();
             //WorldManager
         }
-
-        if (nameObject.activeSelf)
-            nameObject.transform.position = GetNameUIPos();
     }
 }
