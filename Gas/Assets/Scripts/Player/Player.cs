@@ -105,9 +105,16 @@ public class Player : MonoBehaviour
         playerObject.transform.rotation = Quaternion.Lerp(playerObject.transform.rotation, Quaternion.LookRotation(moveVector), Time.deltaTime * rotSpeed);
     }
 
+    float tx = 0;
+
     public void SetRotate(float x)
     {
-        this.transform.GetChild(0).transform.rotation = Quaternion.Euler(0, x, 0);
+        if(x != 0)
+        {
+            tx += x;
+        }
+        this.transform.GetChild(0).transform.rotation = Quaternion.Euler(0, tx, 0);
+
         transform.rotation = Quaternion.Euler(0, this.transform.GetChild(0).transform.rotation.eulerAngles.y, 0);
     }
 
